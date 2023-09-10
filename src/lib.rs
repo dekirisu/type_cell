@@ -65,10 +65,9 @@ macro_rules! type_cell {
     )*};
 
     (@Vec $( $ty:ty: $($name:ident),*;)*)=>{
-        $(type_cell!(@Vec $( $ty > $ty: $($name),*;)*);)*
+        type_cell!(@Vec $( $ty > $ty: $($name),*;)*);
     };
     (@Vec #unwrap $( $ty:ty: $($name:ident),*;)*)=>{
-        // $(type_cell!(@Vec #unwrap $( $ty > $ty: $($name),*;)*);)*
         type_cell!(@Vec #unwrap $( $ty > $ty: $($name),*;)*);
     };
     (@Vec #unwrap #clone $( $ty:ty: $($name:ident),*;)*)=>{
@@ -87,7 +86,7 @@ macro_rules! type_cell {
     )*};
 
     (@HashMap<$id:ty> $( $ty:ty: $($name:ident),*;)*)=>{
-        $(type_cell!(@HashMap<$id> $( $ty > $ty: $($name),*;)*);)*
+        type_cell!(@HashMap<$id> $( $ty > $ty: $($name),*;)*);
     };
     (@HashMap<$id:ty> #unwrap $( $ty:ty: $($name:ident),*;)*)=>{
         type_cell!(@HashMap<$id> #unwrap $( $ty > $ty: $($name),*;)*);

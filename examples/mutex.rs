@@ -1,6 +1,13 @@
 use std::sync::{Mutex, TryLockResult, MutexGuard};
 use type_cell::*;
-type_cell!(on u8 > store Mutex<u8> | set Mutex<u8> | get.try_lock() TryLockResult<MutexGuard<'static,u8>> | mutex);
+
+type_cell!(u8 {
+    static Mutex<u8>: once!
+    set set_mutex(..);
+    get get_mutex_ref();
+    get get_mutex() -> TryLockResult<MutexGuard<'static,u8>>: static.try_lock();
+
+});
 
 fn main () {
     // set global on startup

@@ -1,12 +1,12 @@
 [package]
 name = "type_cell"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 
 authors = ["Dekirisu <dekirisu@gmail.com>"]
-description = "Attach single assignment cells to types using get/set methods."
-keywords = ["static"]
+description = "Attach values statically to a type using static get/set methods."
+keywords = ["macro","static","lazy"]
 categories = ["rust-patterns", "memory-management"]
 
 repository = "https://github.com/dekirisu/type_cell"

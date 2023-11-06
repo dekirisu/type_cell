@@ -8,110 +8,174 @@
     <a href="https://docs.rs/type_cell" style="position:relative">
         <img src="https://img.shields.io/docsrs/type_cell">
     </a>
-    <a href="https://discord.gg/kevWvBuPFg" style="position:relative">
-        <img src="https://img.shields.io/discord/515100001903312898">
-    </a>
 </p>
-Macro to attach <a href="https://github.com/matklad/once_cell">OnceCell</a> to a Type using getter/setter methods. This is mainly useful for variables which will be set at the start and be accessed read-only.
-Initially developed for use with the Bevy-Engine to easily access Handles (smart pointers to assets) globally.
 
-- The value can only be set once.
-- The value has to be set before getting.
-
-## Simplified Usage
-
-- `$typeOn > $typeStore: $name_1, $name_n;` <br>
-  **$typeOn:** The Type to implement the getter/setter methods in.<br>
-  **$typeStore:** The Type, stored in the cell.<br>
-  **$names:** The Type, stored in the cell.
+Macro to 'attach' values statically to a type using static getter and setter methods.
 ```rust
-use type_cell::*;
+// Simple Preview 
+type_cell!{once! u32: a_number;} 
+u32::set_a_number(6);
+assert_eq!(&6u32,u32::get_a_number());
+```
+There are different settings available: <br>
+🌟 `once!` Set it once. Get it read-only! (combine with Mutex/RwLock/... for mutability)<br>
+🦥 `lazy!` Lazily access a value, set within the macro!<br>
+🏁 `risky!` Set it once. Get it mutable, but risk race conditions! (be sure you win the race!)<br>
+👹 `unsafe!` Same as risky!, but setters and getters are unsafe! 
+
+## 🧱 Basic Usage
+- Use the macro: `type_cell!{...}`
+- Which type should the value be 'attached' on? `u32 {...}`
+- Which type does the value have? `static u32:`
+    - Which settings will it use? `once!`, `lazy!`, `risky` or `unsafe!`
+    - examples: `static u32: once!` or `static String: lazy!`
+- What's the name of the default setter method? `set_type(..)`
+- What's the name of the default getter method? `get_type()`
+
+```rust
+// Basic Usage 
+type_cell!{ bool {
+    static Vec<bool>: once!
+    set set_vec(..);
+    get vec();
+}}
+// Set it somewhere once:
+bool::set_vec(Vec::from([true,false,true]));
+// Get it anywhere afterwards:
+assert_eq!(&[true,false,true],bool::vec().as_slice());
+```
+The default setter parameter is a dynamic `Into<..>` and will use `.into()`.<br>
+This means in this example you could also set it like this:
+```rust
+bool::set_vec([true,false,true]);
+assert_eq!(&[true,false,true],bool::vec().as_slice());
+```
+## ⚗ Advanced Usage
+Multiple Setter and Getter with different parameters and return types can be defined! <br>
+There are two ways of doing it:
+- **Methods:** 
+    - Use inline methods for simple conversions!
+    - `set set_bool(Option<usize>): do.is_some();`
+    - `get get_bool() -> bool: static.clone();`
+- **Function:** 
+    - Use a function with correct parameters/return types and is accessible in the same file!
+    - Use `=` before the function meta!
+    - `set =set_base_fn(a:Option<usize>);` 
+    - `get =get_base_fn(..) -> bool;`
+```rust
+// Advanced Usage 
+fn set_by_function (a:Option<usize>) -> bool {a.is_some()}
+fn get_by_function (a:&bool) -> bool {a.clone()}
+type_cell!{ bool {
+    static bool: once!
+    set set_raw(..);
+    set set_by_methods(Option<usize>): do.is_some();
+    set =set_by_function(a:Option<usize>);
+    get get_raw();
+    get get_by_methods() -> bool: static.clone();
+    get =get_by_function(..) -> bool;
+}}
+bool::set_by_methods(None);
+assert_eq!(false,bool::get_by_methods());
+```
+Methods with parameters are supported in two different ways:
+- **Constants:**
+    - Using `=` before a constant value!
+    - `set set_number(u32): do.clamp(=0,=100);`
+    - `get get_number() -> bool: static.clamp(=0,=100);`
+- **Pass Through:**
+    - Naming the values with its types will pass it into the function!
+    - `set set_number(u32): do.clamp(min:u32,max:u32);`
+    - `get get_number() -> bool: static.clamp(min:u32,max:u32);`
+```rust
+// Advanced Usage 
+type_cell!{ u32 {
+    static u32: once!
+    set set_raw(..);
+    set set_by_methods(u32): do.clamp(=0,=100);
+    set set_pass(u32): do.clamp(min:u32,max:u32);
+    get get_raw();
+    get get_by_methods() -> u32: static.add(=5);
+    get get_pass() -> u32: static.add(val:u32);
+}}
+// Sets value to 1000.clamp(0,123) = 123
+u32::set_pass(1000,0,123); 
+// Gets 123.add(5) = 128
+assert_eq!(128,u32::get_by_methods());
+```
+## 👹 As Risky/Unsafe Mutable
+⚠`Only use this if you're sure there are no race conditions (or they don't matter) or for debug purposes!`<br>
+To make the static value mutable, use `risky!` or `unsafe!`.
+```rust
+// Risky Mutable
+type_cell!{ u32 {
+    static u32: risky!
+    set set_number(..);
+    get number();
+}}
+// Set it somewhere once:
+u32::set_number(5u32);
+// Default getter is mutable already
+*u32::number() = 10;
+// Gets 10!
+assert_eq!(10,*u32::number());
+```
+
+## 🦥 As Lazy Static
+To create a lazy static value, use the `lazy!` option and use a block instead of the setter function!
+```rust
+// Lazy Static
+type_cell!{ u32 {
+    static HashMap<u32,String>: lazy!
+    set {
+        let mut map = HashMap::new();
+        for i in 0..100 {
+            map.insert(i,i.to_string());
+        }
+        map
+    }
+    get get_lazy_map();
+    get get_lazy(..) -> Option<&String>: static.get(id:&u32);
+}}
+// Gets Some("3":&String)
+assert_eq!(&"3",&u32::get_lazy(&3).unwrap());
+```
+## 🗺 Simple Mapping
+If you only need the default getter and setters, there is a shortcut included for `once!`, `risky!` and `unsafe!`:
+```rust
+// Simple Usage
 type_cell!{
-    // #clone // the getters return the values cloned
     // store a vec of bools on the bool type
-    bool > Vec<bool>: bools;
+    // which has to be set once somewhere 
+    // and is read only afterwards
+    once! bool > Vec<bool>: bools, more_bools;
     // store a u8 on the u8 type
-    u8 > u8: app_id, seed;
+    // which has to be set once somewhere 
+    // which can be read mutable, risking race conditions!
+    risky! u8 > u8: id, seed;
+    // store a u8 of u8s on the u8 type
+    // which has to be set once somewhere 
+    // which can be read mutable, risking race conditions!
+    // but has to be used inside a unsafe block
+    unsafe! String > &'static str: app_name;
 }
-fn main () {
-    // set global on startup
-    bool::set_bools(vec![true,false]);
-    u8::set_app_id(100);
-    u8::set_seed(111);
-    // get anywhere
-    assert_eq!(&vec![true,false], bool::get_bools());
-    assert_eq!(&100, u8::get_app_id());
-    assert_eq!(&111, u8::get_seed());
-}
+bool::set_bools([true,false]);
+bool::set_more_bools([true,false]);
+u8::set_id(100);
+u8::set_seed(100);
+unsafe{String::set_app_name("Name")};
 ```
-## Query Usage
-Queries are the base of this crate, they consist of the following parts and are separated by **|** : <br>
-`on $typeOn > store $typeStore | set $typeIn | get $typeOut | $name`
-- `on $typeOn > store $typeStore` <br>
-  **$typeOn:** The Type to implement the getter/setter methods in.<br>
-  **$typeStore:** The Type, stored in the cell.
-- `set $typeIn[.methods(val:type)]` <br>
-  **$typeIn:** Input-Parameter of the setter method. <br>
-  **.methods(val:type):** Methods applied on $typeIn to fit $typeStore. Parameters of those will be added to the setter method and forwarded.
-- `get $paramOut[.methods(val:type)]`<br>
-  **$typeOut:** Output-Type of the getter method.<br>
-  **.methods(val:type):** Methods applied on $typeStore to fit $typeOut. Parameters of those will be added to the getter method and forwarded.
-- `$name` <br>
-  **$name:** Name of the value, method names will be: `get_$name` and `set_$name`.
-
-### Example 1:
-Store bool on bool, set bool directly and get a reference to it.
+If you only attach values of the same type as their parent:
 ```rust
-use type_cell::*;
-type_cell!(on bool > store bool | set bool | get &'static bool | test);
-fn main () {
-    bool::set_test(true);
-    assert_eq!(&true,bool::get_test());
-}
-```
-
-### Example 2:
-Store bool on bool, set bool directly and get a clone of it.
-```rust
-use type_cell::*;
-type_cell!(on bool > store bool | set bool | get bool.clone() | test);
-fn main () {
-    bool::set_test(true);
-    assert_eq!(true,bool::get_test());
-}
-```
-## Prefabs
-Currently there are simplifications for Vec and HashMap indicated by a **@**:
-```rust
-use type_cell::*;
+// Simplest Usage
 type_cell!{
-    @Vec #unwrap
-    u8: vec;
-}
-fn main () {
-    u8::set_vec(vec![50,100,150,200]);
-    assert_eq!(&150, u8::get_vec(2));
+    once! bool: is_nice;
+    risky! u16: id, seed;
+    unsafe! String: app_slug;
 }
 ```
-```rust
-use type_cell::*;
-use std::collections::HashMap;
-type_cell!{
-    @HashMap<usize> #unwrap #clone
-    bool: map1, map2;
-    u8: map3, map4;
-}
-fn main () {
-    u8::set_map3(HashMap::from([
-        (11,50), (22,100), (33,150), (44,200)
-    ]));
-    assert_eq!(150, u8::get_map3(&33));
-}
-```
-
-## Mutability
-Mutability can be achieved using Mutex, RwLock or other locks, just make sure you know what you're doing!
-
+## 🔗 Related Projects
+- <a href="https://crates.io/crates/bevy_cell">bevy_cell</a> - Attach bevy Handle and Entity to types.
 ---
 ### License
 <sup>

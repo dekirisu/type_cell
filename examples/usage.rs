@@ -75,7 +75,6 @@ use type_cell::*;
             }
             map
         }
-        get get_lazy_map();
         get get_lazy(..) -> Option<&String>: static.get(id:&u32);
     }}
 

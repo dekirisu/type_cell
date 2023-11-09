@@ -1,7 +1,6 @@
 //! Macro to 'attach' values statically to a type using getter/setter methods. 
-
-pub use once_cell::sync::{OnceCell,Lazy};
-pub use paste::paste;
+pub use once_cell;
+pub use paste;
 
 #[macro_export]
 macro_rules! type_cell {
@@ -15,8 +14,8 @@ macro_rules! type_cell {
         get $gbname:ident();
         $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
         $(get =$gfname:ident(..) -> $gfret:ty;)*
-    })=>{paste!{
-        static [<T Y C E _ $sbname:upper _ $on:upper>]: OnceCell<$store> = OnceCell::new();
+    })=>{type_cell::paste::paste!{
+        static [<T Y C E _ $sbname:upper _ $on:upper>]: type_cell::once_cell::sync::OnceCell<$store> = type_cell::once_cell::sync::OnceCell::new();
         pub trait [<TypeCell $sbname:camel $on:camel>] {
             // Set
             fn $sbname (set:impl Into<$store>);
@@ -56,7 +55,7 @@ macro_rules! type_cell {
         get $gbname:ident();
         $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
         $(get =$gfname:ident(..) -> $gfret:ty;)*
-    })=>{paste!{
+    })=>{type_cell::paste::paste!{
         static mut [<T Y C E _ $sbname:upper _ $on:upper>]: Option<$store> = None;
         pub trait [<TypeCell $sbname:camel $on:camel>] {
             // Set
@@ -102,7 +101,7 @@ macro_rules! type_cell {
         get $gbname:ident();
         $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
         $(get =$gfname:ident(..) -> $gfret:ty;)*
-    })=>{paste!{
+    })=>{type_cell::paste::paste!{
         static mut [<T Y C E _ $sbname:upper _ $on:upper>]: Option<$store> = None;
         pub trait [<TypeCell $sbname:camel $on:camel>] {
             // Set
@@ -146,8 +145,8 @@ macro_rules! type_cell {
         get $gbname:ident();
         $(get $gname:ident(..) -> $gret:ty: static$(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
         $(get =$gfname:ident(..) -> $gfret:ty;)*
-    })=>{paste!{
-        static [<T Y C E _ $gbname:upper _ $on:upper>]: Lazy<$store> = Lazy::new(||$lazy);
+    })=>{type_cell::paste::paste!{
+        static [<T Y C E _ $gbname:upper _ $on:upper>]: type_cell::once_cell::sync::Lazy<$store> = type_cell::once_cell::sync::Lazy::new(||$lazy);
         pub trait [<TypeCell $gbname:camel $on:camel>] {
             fn $gbname () -> &'static $store;
             $(fn $gname ($($($gvar:$gvarty),*)*) -> $gret;)*
@@ -163,10 +162,51 @@ macro_rules! type_cell {
                 {$gfunc(&*[<T Y C E _ $gbname:upper _ $on:upper>])})*
         }
     }};
+
+    ( $on:ident<$($gen:ty),*> {
+        static $store:ty: lazy!
+        set $lazy:block
+        get $gbname:ident(..) -> $gbret:ty: static$(.$gbmeth:ident( $($gbvar:ident:$gbvarty:ty),* $(=$gbconst:expr),*))*;
+        $(get $gname:ident(..) -> $gret:ty: static$(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
+        $(get =$gfname:ident(..) -> $gfret:ty;)*
+    })=>{type_cell::paste::paste!{
+        static [<T Y C E _ $gbname:upper _ $on:upper>]: type_cell::once_cell::sync::Lazy<$store> = type_cell::once_cell::sync::Lazy::new(||$lazy);
+        pub trait [<TypeCell $gbname:camel $on:camel>] {
+            fn $gbname ($($($gbvar:$gbvarty),*)*) -> $gbret;
+            $(fn $gname ($($($gvar:$gvarty),*)*) -> $gret;)*
+            $(fn $gfname () -> $gfret;)*
+        }
+        impl [<TypeCell $gbname:camel $on:camel>] for $on<$($gen),*> {
+            fn $gbname ($($($gbvar:$gbvarty),*)*) -> $gbret {
+                (&*[<T Y C E _ $gbname:upper _ $on:upper>])$(.$gbmeth($($gbvar),* $($gbconst),*))*
+            }
+            $(fn $gname ($($($gvar:$gvarty),*)*) -> $gret {
+                (&*[<T Y C E _ $gbname:upper _ $on:upper>])$(.$gmeth($($gvar),* $($gconst),*))*
+            })*
+            $(fn $gfname () -> $gfret 
+                {$gfunc(&*[<T Y C E _ $gbname:upper _ $on:upper>])})*
+        }
+    }};
     
 /* -------------------------------------------------------------------------- */
 /*                                  Variation                                 */
 /* -------------------------------------------------------------------------- */
+
+    ($on:ident{
+        static $store:ty: $opt:ident!
+        set $block:block
+        get $gbname:ident(..) -> $gbret:ty: static$(.$gbmeth:ident( $($gbvar:ident:$gbvarty:ty),* $(=$gbconst:expr),*))*;
+        $(get $gname:ident(..) -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
+        $(get =$gfname:ident(..) -> $gfret:ty;)*
+    })=>{
+        type_cell!{$on<>{
+            static $store: $opt!
+            set $block
+            get $gbname(..) -> $gbret: static$(.$gbmeth($($gbvar:$gbvarty),*  $(=$gbconst),*))*;
+            $(get $gname(..) -> $gret: static$(.$gmeth($($gvar:$gvarty),*  $(=$gconst),*))*; )*
+            $(get =$gfname(..) -> $gfret;)*
+        }}
+    };
 
     ($on:ident{
         static $store:ty: $opt:ident!
@@ -206,7 +246,7 @@ macro_rules! type_cell {
 
 /* --------------------------------- Simple --------------------------------- */
 
-    ($($opt:ident! $on:ty > $ty:ty: $($name:ident),*;)*)=>{paste!{
+    ($($opt:ident! $on:ty > $ty:ty: $($name:ident),*;)*)=>{type_cell::paste::paste!{
         $($(type_cell!{ $on {
             static $ty: $opt!
             set [<set_ $name>](..);
@@ -214,7 +254,7 @@ macro_rules! type_cell {
         }})*)*
     }}; 
 
-    ($($opt:ident! $on:ty: $($name:ident),*;)*)=>{paste!{
+    ($($opt:ident! $on:ty: $($name:ident),*;)*)=>{type_cell::paste::paste!{
         type_cell!{ $( $opt! $on > $on: $($name),*;)*}
     }};
 

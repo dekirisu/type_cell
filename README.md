@@ -1,4 +1,7 @@
 <p align="center">
+    <img src="https://user-images.githubusercontent.com/78398528/282165324-e99cae4c-ce93-402c-949f-3f48708a716b.gif">
+</p>
+<p align="center">
     <a href="https://github.com/dekirisu/type_cell" style="position:relative">
         <img src="https://img.shields.io/badge/github-dekirisu/type_cell-ee6677">
     </a>
@@ -11,7 +14,12 @@
 </p>
 
 Macro to 'attach' values statically to a type using static getter and setter methods.
+```toml
+[dependencies]
+type_cell = "0.2"
+```
 ```rust
+use type_cell::*;
 // Simple Preview 
 type_cell!{once! u32: a_number;} 
 u32::set_a_number(6);

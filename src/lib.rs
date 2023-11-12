@@ -163,7 +163,7 @@ macro_rules! type_cell {
                 {$gfunc(&*[<T Y C E _ $gbname:upper _ $on:upper>])})*
         }
     }};
-    
+
 /* -------------------------------------------------------------------------- */
 /*                                  Variation                                 */
 /* -------------------------------------------------------------------------- */
@@ -238,25 +238,7 @@ macro_rules! type_cell {
         }}
     };
 
-    ($on:ident {
-        static $store:ty: once!
-        set $sbname:ident();
-        $(set $smname:ident($smmain:ty): do$(.$smeth:ident($($smvar:ident:$smvarty:ty),* $(=$sconst:expr),*))*; )*
-        $(set =$sfname:ident($($sfvar:ident:$sfvarty:ty),*);)*
-        get $gbname:ident();
-        $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
-        $(get =$gfname:ident() -> $gfret:ty;)*
-    })=>{
-        type_cell!{$on<>{
-            static $store: $opt!
-            set $sbname();
-            $(set $smname($smmain): do$(.$smeth($($smvar:$smvarty),* $(=$sconst),*))*;)*
-            $(set =$sfname($($sfvar:$sfvarty),*);)*
-            get $gbname() -> &'static $store;
-            $(get $gname() -> $gret: static$(.$gmeth($($gvar:$gvarty),*  $(=$gconst),*))*; )*
-            $(get =$gfname() -> $gfret;)*
-        }}
-    };
+/* -------------------------------- Specifics ------------------------------- */
 
     ($on:ident<$($gen:ty),*> {
         static $store:ty: once!

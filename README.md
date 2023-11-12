@@ -35,7 +35,7 @@ There are different settings available: <br>
 - Use the macro: `type_cell!{...}`
 - Which type should the value be 'attached' on? `u32 {...}`
 - Which type does the value have? `static u32:`
-    - Which settings will it use? `once!`, `lazy!`, `risky` or `unsafe!`
+    - Which settings will it use? `once!`, `lazy!`, `risky!` or `unsafe!`
     - examples: `static u32: once!` or `static String: lazy!`
 - What's the name of the default setter method? `set_type()`
 - What's the name of the default getter method? `get_type()`

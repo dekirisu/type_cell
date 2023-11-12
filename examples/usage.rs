@@ -3,15 +3,21 @@ use type_cell::*;
 
 /* ------------------------------- Basic Usage ------------------------------ */
 
-    type_cell!{ bool {
+    // Which type should the value be 'attached' on?
+    // type {...}
+    type_cell!{ bool {      
+        // Which type does the value have? `static u32:`
+        // Which settings will it use? once!, lazy!, risky or unsafe!
         static Vec<bool>: once!
-        set set_vec(..);
+        // What's the name of the default setter method?
+        set set_vec();
+        // What's the name of the default getter method?
         get vec();
     }}
 
     fn basic_usage (){
         bool::set_vec([true,false,true]);
-        assert_eq!(&[true,false,true],bool::vec().as_slice());
+        assert_eq!(&[true,false,true], bool::vec().as_slice());
     }
 
 /* ---------------------------- Advanced Usage 1 ---------------------------- */
@@ -20,12 +26,12 @@ use type_cell::*;
     fn get_by_function (a:&bool) -> bool {a.clone()}
     type_cell!{ bool {
         static bool: once!
-        set set_raw(..);
+        set set_raw();
         set set_by_methods(Option<usize>): do.is_some();
         set =set_by_function(a:Option<usize>);
         get get_raw();
         get get_by_methods() -> bool: static.clone();
-        get =get_by_function(..) -> bool;
+        get =get_by_function() -> bool;
     }}
 
     fn advanced_usage_1 (){
@@ -37,7 +43,7 @@ use type_cell::*;
 
     type_cell!{ u32 {
         static u32: once!
-        set set_raw(..);
+        set set_raw();
         set set_by_methods(u32): do.clamp(=0,=100);
         set set_pass(u32): do.clamp(min:u32,max:u32);
         get get_raw();
@@ -54,7 +60,7 @@ use type_cell::*;
 
     type_cell!{ u32 {
         static u32: risky!
-        set set_number(..);
+        set set_number();
         get number();
     }}
 
@@ -75,7 +81,7 @@ use type_cell::*;
             }
             map
         }
-        get get_lazy(..) -> Option<&String>: static.get(id:&u32);
+        get get_lazy() -> Option<&String>: static.get(id:&u32);
     }}
 
     fn lazy_static (){

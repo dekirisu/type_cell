@@ -3,7 +3,7 @@ use type_cell::*;
 
 type_cell!(u8 {
     static Mutex<u8>: once!
-    set set_mutex(..);
+    set set_mutex();
     get get_mutex_ref();
     get get_mutex() -> TryLockResult<MutexGuard<'static,u8>>: static.try_lock();
 

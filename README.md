@@ -37,14 +37,14 @@ There are different settings available: <br>
 - Which type does the value have? `static u32:`
     - Which settings will it use? `once!`, `lazy!`, `risky` or `unsafe!`
     - examples: `static u32: once!` or `static String: lazy!`
-- What's the name of the default setter method? `set_type(..)`
+- What's the name of the default setter method? `set_type()`
 - What's the name of the default getter method? `get_type()`
 
 ```rust
 // Basic Usage 
 type_cell!{ bool {
     static Vec<bool>: once!
-    set set_vec(..);
+    set set_vec();
     get vec();
 }}
 // Set it somewhere once:
@@ -69,19 +69,19 @@ There are two ways of doing it:
     - Use a function with correct parameters/return types and is accessible in the same file!
     - Use `=` before the function meta!
     - `set =set_base_fn(a:Option<usize>);` 
-    - `get =get_base_fn(..) -> bool;`
+    - `get =get_base_fn() -> bool;`
 ```rust
 // Advanced Usage 
 fn set_by_function (a:Option<usize>) -> bool {a.is_some()}
 fn get_by_function (a:&bool) -> bool {a.clone()}
 type_cell!{ bool {
     static bool: once!
-    set set_raw(..);
+    set set_raw();
     set set_by_methods(Option<usize>): do.is_some();
     set =set_by_function(a:Option<usize>);
     get get_raw();
     get get_by_methods() -> bool: static.clone();
-    get =get_by_function(..) -> bool;
+    get =get_by_function() -> bool;
 }}
 bool::set_by_methods(None);
 assert_eq!(false,bool::get_by_methods());
@@ -99,7 +99,7 @@ Methods with parameters are supported in two different ways:
 // Advanced Usage 
 type_cell!{ u32 {
     static u32: once!
-    set set_raw(..);
+    set set_raw();
     set set_by_methods(u32): do.clamp(=0,=100);
     set set_pass(u32): do.clamp(min:u32,max:u32);
     get get_raw();
@@ -118,7 +118,7 @@ To make the static value mutable, use `risky!` or `unsafe!`.
 // Risky Mutable
 type_cell!{ u32 {
     static u32: risky!
-    set set_number(..);
+    set set_number();
     get number();
 }}
 // Set it somewhere once:
@@ -143,7 +143,7 @@ type_cell!{ u32 {
         map
     }
     get get_lazy_map();
-    get get_lazy(..) -> Option<&String>: static.get(id:&u32);
+    get get_lazy() -> Option<&String>: static.get(id:&u32);
 }}
 // Gets Some("3":&String)
 assert_eq!(&"3",&u32::get_lazy(&3).unwrap());

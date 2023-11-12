@@ -8,12 +8,12 @@ macro_rules! type_cell {
 
     ( $on:ident<$($gen:ty),*> {
         static $store:ty: once!
-        set $sbname:ident(..);
+        set $sbname:ident();
         $(set $smname:ident($smmain:ty): do$(.$smeth:ident($($smvar:ident:$smvarty:ty),* $(=$sconst:expr),*))*; )*
         $(set =$sfname:ident($($sfvar:ident:$sfvarty:ty),*);)*
         get $gbname:ident();
         $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
-        $(get =$gfname:ident(..) -> $gfret:ty;)*
+        $(get =$gfname:ident() -> $gfret:ty;)*
     })=>{type_cell::paste::paste!{
         static [<T Y C E _ $sbname:upper _ $on:upper>]: type_cell::once_cell::sync::OnceCell<$store> = type_cell::once_cell::sync::OnceCell::new();
         pub trait [<TypeCell $sbname:camel $on:camel>] {
@@ -49,12 +49,12 @@ macro_rules! type_cell {
 
     ( $on:ident<$($gen:ty),*> {
         static $store:ty: unsafe!
-        set $sbname:ident(..);
+        set $sbname:ident();
         $(set $smname:ident($smmain:ty): do$(.$smeth:ident($($smvar:ident:$smvarty:ty),* $(=$sconst:expr),*))*; )*
         $(set =$sfname:ident($($sfvar:ident:$sfvarty:ty),*);)*
         get $gbname:ident();
         $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
-        $(get =$gfname:ident(..) -> $gfret:ty;)*
+        $(get =$gfname:ident() -> $gfret:ty;)*
     })=>{type_cell::paste::paste!{
         static mut [<T Y C E _ $sbname:upper _ $on:upper>]: Option<$store> = None;
         pub trait [<TypeCell $sbname:camel $on:camel>] {
@@ -95,12 +95,12 @@ macro_rules! type_cell {
 
     ( $on:ident<$($gen:ty),*> {
         static $store:ty: risky!
-        set $sbname:ident(..);
+        set $sbname:ident();
         $(set $smname:ident($smmain:ty): do$(.$smeth:ident($($smvar:ident:$smvarty:ty),* $(=$sconst:expr),*))*; )*
         $(set =$sfname:ident($($sfvar:ident:$sfvarty:ty),*);)*
         get $gbname:ident();
         $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
-        $(get =$gfname:ident(..) -> $gfret:ty;)*
+        $(get =$gfname:ident() -> $gfret:ty;)*
     })=>{type_cell::paste::paste!{
         static mut [<T Y C E _ $sbname:upper _ $on:upper>]: Option<$store> = None;
         pub trait [<TypeCell $sbname:camel $on:camel>] {
@@ -143,8 +143,8 @@ macro_rules! type_cell {
         static $store:ty: lazy!
         set $lazy:block
         get $gbname:ident();
-        $(get $gname:ident(..) -> $gret:ty: static$(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
-        $(get =$gfname:ident(..) -> $gfret:ty;)*
+        $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
+        $(get =$gfname:ident() -> $gfret:ty;)*
     })=>{type_cell::paste::paste!{
         static [<T Y C E _ $gbname:upper _ $on:upper>]: type_cell::once_cell::sync::Lazy<$store> = type_cell::once_cell::sync::Lazy::new(||$lazy);
         pub trait [<TypeCell $gbname:camel $on:camel>] {
@@ -166,9 +166,9 @@ macro_rules! type_cell {
     ( $on:ident<$($gen:ty),*> {
         static $store:ty: lazy!
         set $lazy:block
-        get $gbname:ident(..) -> $gbret:ty: static$(.$gbmeth:ident( $($gbvar:ident:$gbvarty:ty),* $(=$gbconst:expr),*))*;
-        $(get $gname:ident(..) -> $gret:ty: static$(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
-        $(get =$gfname:ident(..) -> $gfret:ty;)*
+        get $gbname:ident() -> $gbret:ty: static$(.$gbmeth:ident( $($gbvar:ident:$gbvarty:ty),* $(=$gbconst:expr),*))*;
+        $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
+        $(get =$gfname:ident() -> $gfret:ty;)*
     })=>{type_cell::paste::paste!{
         static [<T Y C E _ $gbname:upper _ $on:upper>]: type_cell::once_cell::sync::Lazy<$store> = type_cell::once_cell::sync::Lazy::new(||$lazy);
         pub trait [<TypeCell $gbname:camel $on:camel>] {
@@ -195,16 +195,16 @@ macro_rules! type_cell {
     ($on:ident{
         static $store:ty: $opt:ident!
         set $block:block
-        get $gbname:ident(..) -> $gbret:ty: static$(.$gbmeth:ident( $($gbvar:ident:$gbvarty:ty),* $(=$gbconst:expr),*))*;
-        $(get $gname:ident(..) -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
-        $(get =$gfname:ident(..) -> $gfret:ty;)*
+        get $gbname:ident() -> $gbret:ty: static$(.$gbmeth:ident( $($gbvar:ident:$gbvarty:ty),* $(=$gbconst:expr),*))*;
+        $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
+        $(get =$gfname:ident() -> $gfret:ty;)*
     })=>{
         type_cell!{$on<>{
             static $store: $opt!
             set $block
-            get $gbname(..) -> $gbret: static$(.$gbmeth($($gbvar:$gbvarty),*  $(=$gbconst),*))*;
-            $(get $gname(..) -> $gret: static$(.$gmeth($($gvar:$gvarty),*  $(=$gconst),*))*; )*
-            $(get =$gfname(..) -> $gfret;)*
+            get $gbname() -> $gbret: static$(.$gbmeth($($gbvar:$gbvarty),*  $(=$gbconst),*))*;
+            $(get $gname() -> $gret: static$(.$gmeth($($gvar:$gvarty),*  $(=$gconst),*))*; )*
+            $(get =$gfname() -> $gfret;)*
         }}
     };
 
@@ -212,35 +212,35 @@ macro_rules! type_cell {
         static $store:ty: $opt:ident!
         set $block:block
         get $gbname:ident();
-        $(get $gname:ident(..) -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
-        $(get =$gfname:ident(..) -> $gfret:ty;)*
+        $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
+        $(get =$gfname:ident() -> $gfret:ty;)*
     })=>{
         type_cell!{$on<>{
             static $store: $opt!
             set $block
             get $gbname();
-            $(get $gname(..) -> $gret: static$(.$gmeth($($gvar:$gvarty),*  $(=$gconst),*))*; )*
-            $(get =$gfname(..) -> $gfret;)*
+            $(get $gname() -> $gret: static$(.$gmeth($($gvar:$gvarty),*  $(=$gconst),*))*; )*
+            $(get =$gfname() -> $gfret;)*
         }}
     };
 
     ($on:ident{
         static $store:ty: $opt:ident!
-        set $sbname:ident(..);
+        set $sbname:ident();
         $(set $smname:ident($smmain:ty): do$(.$smeth:ident($($smvar:ident:$smvarty:ty),* $(=$sconst:expr),*))*; )*
         $(set =$sfname:ident($($sfvar:ident:$sfvarty:ty),*);)*
         get $gbname:ident();
         $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident($($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
-        $(get =$gfname:ident(..) -> $gfret:ty;)*
+        $(get =$gfname:ident() -> $gfret:ty;)*
     })=>{
         type_cell!{$on<>{
             static $store: $opt!
-            set $sbname(..);
+            set $sbname();
             $(set $smname($smmain): do$(.$smeth($($smvar:$smvarty),* $(=$sconst),*))*;)*
             $(set =$sfname($($sfvar:$sfvarty),*);)*
             get $gbname();
             $(get $gname() -> $gret: static$(.$gmeth($($gvar:$gvarty),*  $(=$gconst),*))*; )*
-            $(get =$gfname(..) -> $gfret;)*
+            $(get =$gfname() -> $gfret;)*
         }}
     };
 
@@ -249,7 +249,7 @@ macro_rules! type_cell {
     ($($opt:ident! $on:ty > $ty:ty: $($name:ident),*;)*)=>{type_cell::paste::paste!{
         $($(type_cell!{ $on {
             static $ty: $opt!
-            set [<set_ $name>](..);
+            set [<set_ $name>]();
             get [<get_ $name>]();
         }})*)*
     }}; 

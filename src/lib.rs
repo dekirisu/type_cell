@@ -145,21 +145,13 @@ macro_rules! type_cell {
         get $gbname:ident();
         $(get $gname:ident() -> $gret:ty: static$(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*; )*
         $(get =$gfname:ident() -> $gfret:ty;)*
-    })=>{type_cell::paste::paste!{
-        static [<T Y C E _ $gbname:upper _ $on:upper>]: type_cell::once_cell::sync::Lazy<$store> = type_cell::once_cell::sync::Lazy::new(||$lazy);
-        pub trait [<TypeCell $gbname:camel $on:camel>] {
-            fn $gbname () -> &'static $store;
-            $(fn $gname ($($($gvar:$gvarty),*)*) -> $gret;)*
-            $(fn $gfname () -> $gfret;)*
-        }
-        impl [<TypeCell $gbname:camel $on:camel>] for $on<$($gen),*> {
-            fn $gbname () -> &'static $store 
-                {&*[<T Y C E _ $gbname:upper _ $on:upper>]}
-            $(fn $gname ($($($gvar:$gvarty),*)*) -> $gret {
-                (&*[<T Y C E _ $gbname:upper _ $on:upper>])$(.$gmeth($($gvar),* $($gconst),*))*
-            })*
-            $(fn $gfname () -> $gfret 
-                {$gfunc(&*[<T Y C E _ $gbname:upper _ $on:upper>])})*
+    })=>{
+        type_cell!{ $on<$($gen),*> {
+            static $store: lazy!
+            set $lazy
+            get $gbname -> &'static $store;
+            $(get $gname() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*; )*
+            $(get =$gfname() -> $gfret;)*
         }
     }};
 

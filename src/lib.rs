@@ -350,11 +350,6 @@ macro_rules! tycell {
 
 /* --------------------------------- Simple --------------------------------- */
 
-    // quick
-    (=$on:ty:$($full:tt)*)=>{paste!{
-        tycell!{=$on>$on:$($full)*}
-    }};  
-
     // quick lazy
     (=$on:ty>$ty:ty: $name:ident $lazy:block)=>{paste!{
         tycell!{ $on {
@@ -399,6 +394,57 @@ macro_rules! tycell {
         }}
     }}; 
 
+/* ----------------------------- Simple HashMap ----------------------------- */
+
+    // quick lazy
+    (=$on:ty>$ty:ty: $name:ident <$key:ty> $lazy:block)=>{paste!{
+        tycell!{ $on {
+            static TyMap<$key,$ty>: lazy_read;
+            set $lazy
+            get [<$name _map>]();
+            get $name() -> &'static $ty: static.get(id:&$key).unwrap();
+        }}
+    }};  
+
+    // quick lazy mut
+    (=$on:ty>$ty:ty: mut $name:ident <$key:ty> $lazy:block)=>{paste!{
+        tycell!{ $on {
+            static TyMap<$key,$ty>: lazy_write;
+            set $lazy
+            get [<$name _map>]();
+            get $name() -> &'static $ty: static.get(id:&$key).unwrap();
+            get [<$name _mut>]() -> &'static mut $ty: static.get_mut(id:&$key).unwrap();
+        }}
+    }};  
+
+    // quick once
+    (=$on:ty>$ty:ty: $name:ident <$key:ty>)=>{paste!{
+        tycell!{ $on {
+            static TyMap<$key,$ty>: once_read;
+            set [<set_ $name>]();
+            get [<$name _map>]();
+            get $name() -> &'static $ty: static.get(id:&$key).unwrap();
+        }}
+    }};  
+
+    // quick once mut
+    (=$on:ty>$ty:ty: mut $name:ident <$key:ty>)=>{paste!{
+        tycell!{ $on {
+            static TyMap<$key,$ty>: once_write;
+            set [<set_ $name>]();
+            get [<$name _map>]();
+            get $name() -> &'static $ty: static.get(id:&$key).unwrap();
+            get [<$name _mut>]() -> &'static mut $ty: static.get_mut(id:&$key).unwrap();
+        }}
+    }}; 
+
+/* ------------------------------ Simple Merge ------------------------------ */
+
+    // quick
+    (=$on:ty:$($full:tt)*)=>{paste!{
+        tycell!{=$on>$on:$($full)*}
+    }};  
+
     // merged
     ($($on:ty > $ty:ty: $([$($name:tt)*])*;)*)=>{paste!{
         $($(tycell!{  =$on>$ty:$($name)* })*)*
@@ -408,7 +454,6 @@ macro_rules! tycell {
     ($($on:ty: $([$($name:tt)*])*;)*)=>{paste!{
         $($(tycell!{  =$on>$on:$($name)* })*)*
     }}; 
-
 
 /* ------------------------------------ - ----------------------------------- */
 }

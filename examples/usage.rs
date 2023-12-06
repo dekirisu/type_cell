@@ -5,10 +5,10 @@ use type_cell::*;
 
     // Which type should the value be 'attached' on?
     // type {...}
-    type_cell!{ bool {      
+    tycell!{ bool {      
         // Which type does the value have? `static u32:`
         // Which settings will it use? once!, lazy!, risky or unsafe!
-        static Vec<bool>: once!
+        static Vec<bool>: once_read;
         // What's the name of the default setter method?
         set set_vec();
         // What's the name of the default getter method?
@@ -24,8 +24,8 @@ use type_cell::*;
 
     fn set_by_function (a:Option<usize>) -> bool {a.is_some()}
     fn get_by_function (a:&bool) -> bool {a.clone()}
-    type_cell!{ bool {
-        static bool: once!
+    tycell!{ bool {
+        static bool: once_read;
         set set_raw();
         set set_by_methods(Option<usize>): do.is_some();
         set =set_by_function(a:Option<usize>);
@@ -41,8 +41,8 @@ use type_cell::*;
 
 /* ---------------------------- Advanced Usage 2 ---------------------------- */
 
-    type_cell!{ u32 {
-        static u32: once!
+    tycell!{ u32 {
+        static u32: once_read;
         set set_raw();
         set set_by_methods(u32): do.clamp(=0,=100);
         set set_pass(u32): do.clamp(min:u32,max:u32);
@@ -58,8 +58,8 @@ use type_cell::*;
 
 /* ------------------------------ Risky Mutable ----------------------------- */
 
-    type_cell!{ u32 {
-        static u32: risky!
+    tycell!{ u32 {
+        static u32: once_write;
         set set_number();
         get number();
     }}
@@ -72,8 +72,8 @@ use type_cell::*;
 
 /* ------------------------------- Lazy Static ------------------------------ */
 
-    type_cell!{ u32 {
-        static HashMap<u32,String>: lazy!
+    tycell!{ u32 {
+        static HashMap<u32,String>: lazy_read;
         set {
             let mut map = HashMap::new();
             for i in 0..100 {
@@ -90,10 +90,9 @@ use type_cell::*;
 
 /* ------------------------------ Simple Usage ------------------------------ */
 
-    type_cell!{
-        once! bool > Vec<bool>: bools, more_bools;
-        risky! u8 > u8: id, seed;
-        unsafe! String > &'static str: app_name;
+    tycell!{
+        bool > Vec<bool>: [bools][more_bools];
+        u8 > u8: [id][seed];
     }
 
     fn simple_usage (){
@@ -101,22 +100,19 @@ use type_cell::*;
         bool::set_more_bools([true,false]);
         u8::set_id(100);
         u8::set_seed(100);
-        unsafe{String::set_app_name("Name")};
     }
 
 /* ----------------------------- Simplest Usage ----------------------------- */
 
-    type_cell!{
-        once! bool: is_nice;
-        risky! u16: id, seed;
-        unsafe! String: app_slug;
+    tycell!{
+        bool: [is_nice];
+        u16: [id][seed];
     }
 
     fn simplest_usage (){
         bool::set_is_nice(true);
         u16::set_id(100u16);
         u16::set_seed(100u16);
-        unsafe{String::set_app_slug("Name")};
     }
 
 /* ---------------------------------- Main ---------------------------------- */

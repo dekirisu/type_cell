@@ -21,29 +21,28 @@ type_cell = "0.2"
 ```rust
 use type_cell::*;
 // Simple Preview 
-type_cell!{once! u32: a_number;} 
+type_cell!{u32:[a_number];} 
 u32::set_a_number(6);
 assert_eq!(&6u32,u32::get_a_number());
 ```
-There are different settings available: <br>
-🌟 `once!` Set it once. Get it read-only! (combine with Mutex/RwLock/... for mutability)<br>
-🦥 `lazy!` Lazily access a value, set within the macro!<br>
-🏁 `risky!` Set it once. Get it mutable, but risk race conditions! (be sure you win the race!)<br>
-👹 `unsafe!` Same as risky!, but setters and getters are unsafe! 
 
 ## 🧱 Basic Usage
 - Use the macro: `type_cell!{...}`
 - Which type should the value be 'attached' on? `u32 {...}`
 - Which type does the value have? `static u32:`
-    - Which settings will it use? `once!`, `lazy!`, `risky!` or `unsafe!`
-    - examples: `static u32: once!` or `static String: lazy!`
+    - Which settings will it use?<br>
+    🌟 `once_read` Set it once. Get it read-only! (combine with Mutex/RwLock/... for mutability)<br>
+    🏁 `once_write` Set it once. Get it mutable, but risk race conditions! (be sure you win the race!)<br>
+    🦥 `lazy_read` Like `once_read` but set lazy inside the macro!<br>
+    👹 `lazy_write`Like `once_write` but set lazy inside the macro!! 
+    - examples: `static u32: once_read;` or `static String: lazy_read;`
 - What's the name of the default setter method? `set_type()`
 - What's the name of the default getter method? `get_type()`
 
 ```rust
 // Basic Usage 
 type_cell!{ bool {
-    static Vec<bool>: once!
+    static Vec<bool>: once_read;
     set set_vec();
     get vec();
 }}
@@ -75,7 +74,7 @@ There are two ways of doing it:
 fn set_by_function (a:Option<usize>) -> bool {a.is_some()}
 fn get_by_function (a:&bool) -> bool {a.clone()}
 type_cell!{ bool {
-    static bool: once!
+    static bool: once_read;
     set set_raw();
     set set_by_methods(Option<usize>): do.is_some();
     set =set_by_function(a:Option<usize>);
@@ -98,7 +97,7 @@ Methods with parameters are supported in two different ways:
 ```rust
 // Advanced Usage 
 type_cell!{ u32 {
-    static u32: once!
+    static u32: once_read;
     set set_raw();
     set set_by_methods(u32): do.clamp(=0,=100);
     set set_pass(u32): do.clamp(min:u32,max:u32);
@@ -111,13 +110,13 @@ u32::set_pass(1000,0,123);
 // Gets 123.add(5) = 128
 assert_eq!(128,u32::get_by_methods());
 ```
-## 👹 As Risky/Unsafe Mutable
+## 👹 Risky Mutable Options
 ⚠`Only use this if you're sure there are no race conditions (or they don't matter) or for debug purposes!`<br>
-To make the static value mutable, use `risky!` or `unsafe!`.
+To make the static value mutable, use `once_write` or `lazy_write`.
 ```rust
 // Risky Mutable
 type_cell!{ u32 {
-    static u32: risky!
+    static u32: risky_write;
     set set_number();
     get number();
 }}
@@ -130,11 +129,11 @@ assert_eq!(10,*u32::number());
 ```
 
 ## 🦥 As Lazy Static
-To create a lazy static value, use the `lazy!` option and use a block instead of the setter function!
+To create a lazy static value, use the `lazy_read` option and use a block instead of the setter function!
 ```rust
 // Lazy Static
 type_cell!{ u32 {
-    static HashMap<u32,String>: lazy!
+    static HashMap<u32,String>: lazy_read;
     set {
         let mut map = HashMap::new();
         for i in 0..100 {
@@ -149,37 +148,25 @@ type_cell!{ u32 {
 assert_eq!(&"3",&u32::get_lazy(&3).unwrap());
 ```
 ## 🗺 Simple Mapping
-If you only need the default getter and setters, there is a shortcut included for `once!`, `risky!` and `unsafe!`:
+If you only need the default getter and setters, there is a short form:
 ```rust
 // Simple Usage
 type_cell!{
     // store a vec of bools on the bool type
-    // which has to be set once somewhere 
-    // and is read only afterwards
-    once! bool > Vec<bool>: bools, more_bools;
-    // store a u8 on the u8 type
-    // which has to be set once somewhere 
-    // which can be read mutable, risking race conditions!
-    risky! u8 > u8: id, seed;
-    // store a u8 of u8s on the u8 type
-    // which has to be set once somewhere 
-    // which can be read mutable, risking race conditions!
-    // but has to be used inside a unsafe block
-    unsafe! String > &'static str: app_name;
+    // a single specifier inside [..] will use once_read
+    // adding 'mut' before it sets it to once_write
+    // adding a block {} after the specifier will use lazy_.. instead of once_..
+    bool > Vec<bool>: [bools] [mut more_bools] [lazy_bools{vec![true,false]}];
 }
 bool::set_bools([true,false]);
 bool::set_more_bools([true,false]);
-u8::set_id(100);
-u8::set_seed(100);
-unsafe{String::set_app_name("Name")};
 ```
 If you only attach values of the same type as their parent:
 ```rust
 // Simplest Usage
 type_cell!{
-    once! bool: is_nice;
-    risky! u16: id, seed;
-    unsafe! String: app_slug;
+    // Same as bool > bool: [is_nice];
+    bool: [is_nice];
 }
 ```
 ## 🔗 Related Projects

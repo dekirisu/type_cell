@@ -1,12 +1,11 @@
 use std::sync::{Mutex, TryLockResult, MutexGuard};
 use type_cell::*;
 
-type_cell!(u8 {
-    static Mutex<u8>: once!
+tycell!(u8 {
+    static Mutex<u8>: once_read;
     set set_mutex();
     get get_mutex_ref();
     get get_mutex() -> TryLockResult<MutexGuard<'static,u8>>: static.try_lock();
-
 });
 
 fn main () {

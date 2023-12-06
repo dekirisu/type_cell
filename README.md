@@ -16,7 +16,7 @@
 Macro to 'attach' values statically to a type using static getter and setter methods.
 ```toml
 [dependencies]
-type_cell = "0.2"
+type_cell = "0.3"
 ```
 ```rust
 use type_cell::*;

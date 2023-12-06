@@ -21,13 +21,13 @@ type_cell = "0.3"
 ```rust
 use type_cell::*;
 // Simple Preview 
-type_cell!{u32:[a_number];} 
+tycell!{u32:[a_number];} 
 u32::set_a_number(6);
 assert_eq!(&6u32,u32::get_a_number());
 ```
 
 ## 🧱 Basic Usage
-- Use the macro: `type_cell!{...}`
+- Use the macro: `tycell!{...}`
 - Which type should the value be 'attached' on? `u32 {...}`
 - Which type does the value have? `static u32:`
     - Which settings will it use?<br>
@@ -41,7 +41,7 @@ assert_eq!(&6u32,u32::get_a_number());
 
 ```rust
 // Basic Usage 
-type_cell!{ bool {
+tycell!{ bool {
     static Vec<bool>: once_read;
     set set_vec();
     get vec();
@@ -73,7 +73,7 @@ There are two ways of doing it:
 // Advanced Usage 
 fn set_by_function (a:Option<usize>) -> bool {a.is_some()}
 fn get_by_function (a:&bool) -> bool {a.clone()}
-type_cell!{ bool {
+tycell!{ bool {
     static bool: once_read;
     set set_raw();
     set set_by_methods(Option<usize>): do.is_some();
@@ -96,7 +96,7 @@ Methods with parameters are supported in two different ways:
     - `get get_number() -> bool: static.clamp(min:u32,max:u32);`
 ```rust
 // Advanced Usage 
-type_cell!{ u32 {
+tycell!{ u32 {
     static u32: once_read;
     set set_raw();
     set set_by_methods(u32): do.clamp(=0,=100);
@@ -110,12 +110,24 @@ u32::set_pass(1000,0,123);
 // Gets 123.add(5) = 128
 assert_eq!(128,u32::get_by_methods());
 ```
+## 🧊 Constant
+You can also set const values!
+```rust
+// Constant
+tycell!{ u32 {
+    const u32 = 100;
+    get number();
+}}
+// Gets 10!
+assert_eq!(10,u32::number());
+```
+
 ## 👹 Risky Mutable Options
 ⚠`Only use this if you're sure there are no race conditions (or they don't matter) or for debug purposes!`<br>
 To make the static value mutable, use `once_write` or `lazy_write`.
 ```rust
 // Risky Mutable
-type_cell!{ u32 {
+tycell!{ u32 {
     static u32: risky_write;
     set set_number();
     get number();
@@ -132,7 +144,7 @@ assert_eq!(10,*u32::number());
 To create a lazy static value, use the `lazy_read` option and use a block instead of the setter function!
 ```rust
 // Lazy Static
-type_cell!{ u32 {
+tycell!{ u32 {
     static HashMap<u32,String>: lazy_read;
     set {
         let mut map = HashMap::new();
@@ -151,12 +163,14 @@ assert_eq!(&"3",&u32::get_lazy(&3).unwrap());
 If you only need the default getter and setters, there is a short form:
 ```rust
 // Simple Usage
-type_cell!{
+tycell!{
     // store a vec of bools on the bool type
     // a single specifier inside [..] will use once_read
     // adding 'mut' before it sets it to once_write
     // adding a block {} after the specifier will use lazy_.. instead of once_..
     bool > Vec<bool>: [bools] [mut more_bools] [lazy_bools{vec![true,false]}];
+    // adding '= value' after the specifier will set a constant value
+    bool > u32: [number=100];
 }
 bool::set_bools([true,false]);
 bool::set_more_bools([true,false]);
@@ -164,7 +178,7 @@ bool::set_more_bools([true,false]);
 If you only attach values of the same type as their parent:
 ```rust
 // Simplest Usage
-type_cell!{
+tycell!{
     // Same as bool > bool: [is_nice];
     bool: [is_nice];
 }

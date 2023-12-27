@@ -207,8 +207,9 @@ tycell!{
 }
 ```
 
-## ➡ Simple (Hash)Maps
-Ease up getting values from a HasmMap-esque types
+## ➡ Simple (Hash)Maps and Vecs
+Ease up getting values from a HasmMap-esque types, by using <key> after the name.<br>
+if no key is provided, the type is set to a Vec<..> instead.
 ```rust
 // uses anythng named TyMap for flaxibility
 use std::collections::HashMap as TyMap;
@@ -218,10 +219,6 @@ tycell!{
 }
 bool::set_bools([(1,true)]);
 bool::set_more_bools([(1,true)]);
-
-## 🕸 Merged Simple Mapping
-
-
 ```
 ## 🔗 Related Projects
 - <a href="https://crates.io/crates/bevy_cell">bevy_cell</a> - Attach bevy Handle and Entity to types.

@@ -438,6 +438,50 @@ macro_rules! tycell {
         }}
     }}; 
 
+/* ----------------------------- Simple Vec ----------------------------- */
+
+    // quick lazy
+    (=$on:ty>$ty:ty: $name:ident <> $lazy:block)=>{paste!{
+        tycell!{ $on {
+            static Vec<$ty>: lazy_read;
+            set $lazy
+            get [<$name _vec>]();
+            get $name() -> &'static $ty: static.get(id:usize).unwrap();
+        }}
+    }};  
+
+    // quick lazy mut
+    (=$on:ty>$ty:ty: mut $name:ident <> $lazy:block)=>{paste!{
+        tycell!{ $on {
+            static Vec<$ty>: lazy_write;
+            set $lazy
+            get [<$name _vec>]();
+            get $name() -> &'static $ty: static.get(id:usize).unwrap();
+            get [<$name _mut>]() -> &'static mut $ty: static.get_mut(id:usize).unwrap();
+        }}
+    }};  
+
+    // quick once
+    (=$on:ty>$ty:ty: $name:ident <>)=>{paste!{
+        tycell!{ $on {
+            static Vec<$ty>: once_read;
+            set [<set_ $name>]();
+            get [<$name _vec>]();
+            get $name() -> &'static $ty: static.get(id:usize).unwrap();
+        }}
+    }};  
+
+    // quick once mut
+    (=$on:ty>$ty:ty: mut $name:ident <>)=>{paste!{
+        tycell!{ $on {
+            static Vec<$ty>: once_write;
+            set [<set_ $name>]();
+            get [<$name _vec>]();
+            get $name() -> &'static $ty: static.get(id:usize).unwrap();
+            get [<$name _mut>]() -> &'static mut $ty: static.get_mut(id:usize).unwrap();
+        }}
+    }}; 
+
 /* --------------------------- 🌍 Simple Merge 🌍 --------------------------- */
 
     // quick

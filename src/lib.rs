@@ -455,6 +455,26 @@ macro_rules! tycell {
         $($(tycell!{  =$on>$on:$($name)* })*)*
     }}; 
 
+    // wrapped 1D
+    ($(!$wrap:ident<$on:ty>: $([$($name:tt)*])*;)*)=>{paste!{
+        $($(tycell!{  =$on>$wrap<$on>:$($name)* })*)*
+    }}; 
+
+    // wrapped 2D
+    ($(!!$w0:ident<$w1:ident<$on:ty>>: $([$($name:tt)*])*;)*)=>{paste!{
+        $($(tycell!{  =$on>$w0<$w1<$on>>:$($name)* })*)*
+    }}; 
+
+    // wrapped 3D
+    ($(!!!$w0:ident<$w1:ident<$w2:ident<$on:ty>>>: $([$($name:tt)*])*;)*)=>{paste!{
+        $($(tycell!{  =$on>$w0<$w1<$w2<$on>>>:$($name)* })*)*
+    }}; 
+    
+    // wrapped 4D
+    ($(!!!!$w0:ident<$w1:ident<$w2:ident<$w3:ident<$on:ty>>>>: $([$($name:tt)*])*;)*)=>{paste!{
+        $($(tycell!{  =$on>$w0<$w1<$w2<$w3<$on>>>>:$($name)* })*)*
+    }};  
+
 /* ---------------------------- 🌌 Giga Merge 🌌 ---------------------------- */
 
     ($( {$($on:tt)*}: $([$($name:tt)*])*; )*)=>{paste!{

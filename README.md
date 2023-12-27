@@ -159,7 +159,7 @@ tycell!{ u32 {
 // Gets Some("3":&String)
 assert_eq!(&"3",&u32::get_lazy(&3).unwrap());
 ```
-## 🗺 Simple Mapping
+## ➡ Simple Mapping
 If you only need the default getter and setters, there is a short form:
 ```rust
 // Simple Usage
@@ -183,7 +183,31 @@ tycell!{
     bool: [is_nice];
 }
 ```
-## 🗺 Simple (Hash)Maps
+If you want to attach a type to its single generic type, e.g. `u32 > Vec<u32>` you can use `!Vec<u32>`.<br>
+Increase the number of `!` to set the level, e.g. `u32 > Vec<Vec<u32>>` <=> `!!Vec<Vec<u32>>`.<br>
+```rust
+tycell!{
+    !Vec<bool>:[is_nice];
+}
+```
+
+You can't mix different types of left-handed syntax, unless wrapped in `{}`
+```rust
+// working
+tycell!{
+    {!Vec<bool>}:[is_nice];
+    {bool>Vec<bool>}:[is_v_nice];
+    {bool}:[is_x_nice];
+}
+// NOT working
+tycell!{
+    !Vec<bool>:[is_nice];
+    bool>Vec<bool>:[is_v_nice];
+    bool:[is_x_nice];
+}
+```
+
+## ➡ Simple (Hash)Maps
 Ease up getting values from a HasmMap-esque types
 ```rust
 // uses anythng named TyMap for flaxibility
@@ -194,6 +218,10 @@ tycell!{
 }
 bool::set_bools([(1,true)]);
 bool::set_more_bools([(1,true)]);
+
+## 🕸 Merged Simple Mapping
+
+
 ```
 ## 🔗 Related Projects
 - <a href="https://crates.io/crates/bevy_cell">bevy_cell</a> - Attach bevy Handle and Entity to types.

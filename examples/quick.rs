@@ -2,11 +2,11 @@ use type_cell::*;
 use std::collections::HashMap as TyMap;
 
 tycell!{
-    {u8}:   [con=8] [once] [lazy{8}] [mut oncem] [mut lazym{8}];
-    {u16>u8}:  [once<u8>] [lazy<u8>{[(5,100)]}] [mut oncem<u8>] [mut lazym<u8>{[(1,200)]}] [mut lazyv<>{[200]}];
-    {!!!!Vec<Vec<Vec<Vec<u32>>>>}: [lazy<u8>{[(0,vec![vec![vec![vec![99]]]])]}];
+    {u8} [con=8] [once] [lazy{8}] [mut oncem] [mut lazym{8}]
+    {u32} [once.clone()] [lazy.clone()->u32{8u32}] [mut oncem.clone()->u32] [mut lazym.clone()->u32{8u32}]
+    {u16>u8} [once<u8>] [lazy<u8>{[(5,100)]}] [mut oncem<u8>] [mut lazym<u8>{[(1,200)]}] [mut lazyv<>{[200]}]
+    {!!!!Vec<Vec<Vec<Vec<bool>>>>} [lazy<u8>{[(0,vec![vec![vec![vec![true]]]])]}]
 }
-
 
 fn main () {
 
@@ -27,6 +27,6 @@ fn main () {
     
     println!("{}",u16::lazyv_mut(0));
 
-    println!("{}",u32::lazy(&0)[0][0][0][0]);
+    println!("{}",bool::lazy(&0)[0][0][0][0]);
 
 }

@@ -20,12 +20,25 @@ type_cell = "0.3"
 ```
 ```rust
 use type_cell::*;
-// Simple Preview 
-tycell!{u32:[a_number];} 
-u32::set_a_number(6);
-assert_eq!(&6u32,u32::get_a_number());
-```
 
+tycell!{
+    {String} 
+        [nice_str]
+        [lazy_str.clone() -> String {"hello"}]
+    {bool > Vec<bool>} 
+        [is_nice]
+    {!Vec<bool>} 
+        [are_nice]
+}
+
+fn main(){
+    String::set_nice_str("world");
+    assert_eq!(
+        "hello world",
+        &format!("{} {}",&String::lazy_str(),String::nice_str())
+    );
+}
+```
 ## 🧱 Basic Usage
 - Use the macro: `tycell!{...}`
 - Which type should the value be 'attached' on? `u32 {...}`
@@ -195,15 +208,24 @@ You can't mix different types of left-handed syntax, unless wrapped in `{}`
 ```rust
 // working
 tycell!{
-    {!Vec<bool>}:[is_nice];
-    {bool>Vec<bool>}:[is_v_nice];
-    {bool}:[is_x_nice];
+    {!Vec<bool>} [is_nice]
+    {bool>Vec<bool>} [is_v_nice]
+    {bool} [is_x_nice]
 }
 // NOT working
 tycell!{
-    !Vec<bool>:[is_nice];
-    bool>Vec<bool>:[is_v_nice];
-    bool:[is_x_nice];
+    !Vec<bool>: [is_nice];
+    bool>Vec<bool>: [is_v_nice];
+    bool: [is_x_nice];
+}
+```
+
+You can also chain methods for the getter and adjust its return type.
+```rust
+tycell!{
+    {String} 
+        [clone_str.clone()->String] 
+        [clone_lazy_str.clone()->String{"test"}]
 }
 ```
 

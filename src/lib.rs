@@ -1,4 +1,26 @@
 //! Macro to 'attach' values statically to a type using getter/setter methods. 
+
+///
+/// ```rust
+/// use type_cell::*;
+/// tycell!{
+///     {String} 
+///         [nice_str]
+///         [lazy_str.clone() -> String {"hello"}]
+///     {bool > Vec<bool>} 
+///         [is_nice]
+///     {!Vec<bool>} 
+///         [are_nice]
+/// }
+/// fn main(){
+///     String::set_nice_str("world");
+///     assert_eq!(
+///         "hello world",
+///         &format!("{} {}",&String::lazy_str(),String::nice_str())
+///     );
+/// }
+/// ```
+
 pub use once_cell::sync::{OnceCell,Lazy};
 pub use paste::paste;
 
@@ -358,6 +380,21 @@ macro_rules! tycell {
             get $name();
         }}
     }};  
+    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty $lazy:block)=>{paste!{
+        tycell!{ $on {
+            static $ty: lazy_read;
+            set $lazy
+            get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }}; 
+    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* $lazy:block)=>{paste!{
+        tycell!{ $on {
+            static $ty: lazy_read;
+            set $lazy
+            get $name() -> $ty: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }}; 
+
 
     // quick lazy mut
     (=$on:ty>$ty:ty: mut $name:ident $lazy:block)=>{paste!{
@@ -367,6 +404,20 @@ macro_rules! tycell {
             get $name();
         }}
     }};  
+    (=$on:ty>$ty:ty: mut $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty $lazy:block)=>{paste!{
+        tycell!{ $on {
+            static $ty: lazy_write;
+            set $lazy
+            get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }};
+    (=$on:ty>$ty:ty: mut $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* $lazy:block)=>{paste!{
+        tycell!{ $on {
+            static $ty: lazy_write;
+            set $lazy
+            get $name() -> $ty: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }};
 
     // quick once
     (=$on:ty>$ty:ty: $name:ident)=>{paste!{
@@ -376,6 +427,21 @@ macro_rules! tycell {
             get $name();
         }}
     }};  
+    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static $ty: once_read;
+            set [<set_ $name>]();
+            get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }};  
+    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*)=>{paste!{
+        tycell!{ $on {
+            static $ty: once_read;
+            set [<set_ $name>]();
+            get $name() -> $ty: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }};
+
 
     // quick once mut
     (=$on:ty>$ty:ty: mut $name:ident)=>{paste!{
@@ -385,6 +451,21 @@ macro_rules! tycell {
             get $name();
         }}
     }}; 
+    (=$on:ty>$ty:ty: mut $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static $ty: once_write;
+            set [<set_ $name>]();
+            get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }}; 
+    (=$on:ty>$ty:ty: mut $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*)=>{paste!{
+        tycell!{ $on {
+            static $ty: once_write;
+            set [<set_ $name>]();
+            get $name() -> $ty: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }}; 
+
 
     // quick const
     (=$on:ty>$ty:ty: $name:ident = $val:expr)=>{paste!{
@@ -521,6 +602,9 @@ macro_rules! tycell {
 
 /* ---------------------------- 🌌 Giga Merge 🌌 ---------------------------- */
 
+    ($( {$($on:tt)*} $([$($name:tt)*])* )*)=>{paste!{
+        $(tycell!{ $($on)*: $([$($name)*])*; })*
+    }}; 
     ($( {$($on:tt)*}: $([$($name:tt)*])*; )*)=>{paste!{
         $(tycell!{ $($on)*: $([$($name)*])*; })*
     }}; 

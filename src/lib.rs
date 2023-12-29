@@ -387,6 +387,13 @@ macro_rules! tycell {
             get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
         }}
     }}; 
+    (=$on:ty>$ty:ty: $name:ident $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static $ty: lazy_read;
+            set $lazy
+            get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }}; 
     (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* $lazy:block)=>{paste!{
         tycell!{ $on {
             static $ty: lazy_read;
@@ -405,6 +412,13 @@ macro_rules! tycell {
         }}
     }};  
     (=$on:ty>$ty:ty: mut $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty $lazy:block)=>{paste!{
+        tycell!{ $on {
+            static $ty: lazy_write;
+            set $lazy
+            get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }};
+    (=$on:ty>$ty:ty: mut $name:ident $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty)=>{paste!{
         tycell!{ $on {
             static $ty: lazy_write;
             set $lazy

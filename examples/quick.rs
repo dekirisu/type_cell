@@ -3,7 +3,7 @@ use std::collections::HashMap as TyMap;
 
 tycell!{
     {u8} [con=8] [once] [lazy{8}] [mut oncem] [mut lazym{8}]
-    {u32} [once.clone()] [lazy.clone()->u32{8u32}] [mut oncem.clone()->u32] [mut lazym.clone()->u32{8u32}]
+    {u32} [once.clone()] [lazy.clone()->u32{8u32}] [mut oncem.clone()->u32] [mut lazym.clone()->u32{8u32}] [mut lazym2 {8u32}.clone()->u32 ]
     {u16>u8} [once<u8>] [lazy<u8>{[(5,100)]}] [mut oncem<u8>] [mut lazym<u8>{[(1,200)]}] [mut lazyv<>{[200]}]
     {!!!!Vec<Vec<Vec<Vec<bool>>>>} [lazy<u8>{[(0,vec![vec![vec![vec![true]]]])]}]
 }

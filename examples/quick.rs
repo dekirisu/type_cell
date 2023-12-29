@@ -24,8 +24,8 @@ fn main () {
 
     println!("{}",u16::lazy(&5));
     println!("{}",u16::lazym(&1));
-    
-    println!("{}",u16::lazyv_mut(0));
+
+    println!("{}",u16::lazyv(0));
 
     println!("{}",bool::lazy(&0)[0][0][0][0]);
 

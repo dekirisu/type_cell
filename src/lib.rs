@@ -370,70 +370,111 @@ macro_rules! tycell {
         }}
     };
 
-/* --------------------------------- Simple --------------------------------- */
+/* ------------------------------- Simple Lazy ------------------------------ */
 
-    // quick lazy
+    // Base
     (=$on:ty>$ty:ty: $name:ident $lazy:block)=>{paste!{
         tycell!{ $on {
             static $ty: lazy_read;
             set $lazy
             get $name();
         }}
-    }};  
-    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty $lazy:block)=>{paste!{
+    }};
+
+    // with Methods - Pre-Block
+    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty $lazy:block)=>{paste!{
         tycell!{ $on {
             static $ty: lazy_read;
             set $lazy
+            get [<$name _ref>]();
             get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
         }}
     }}; 
-    (=$on:ty>$ty:ty: $name:ident $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty)=>{paste!{
+
+    // with Methods - Post-Block
+    (=$on:ty>$ty:ty: $name:ident $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty)=>{paste!{
         tycell!{ $on {
             static $ty: lazy_read;
             set $lazy
+            get [<$name _ref>]();
             get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
         }}
     }}; 
-    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* $lazy:block)=>{paste!{
+    
+    // with Methods & Self Return Type - Pre-Block
+    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ $lazy:block)=>{paste!{
         tycell!{ $on {
             static $ty: lazy_read;
             set $lazy
+            get [<$name _ref>]();
             get $name() -> $ty: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
         }}
     }}; 
 
+    // with Methods & Self Return Type - Post-Block
+    (=$on:ty>$ty:ty: $name:ident $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+)=>{paste!{
+        tycell!{ $on {
+            static $ty: lazy_read;
+            set $lazy
+            get [<$name _ref>]();
+            get $name() -> $ty: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }}; 
 
-    // quick lazy mut
+/* --------------------------- Simple Mutable Lazy -------------------------- */
+
+    // Base
     (=$on:ty>$ty:ty: mut $name:ident $lazy:block)=>{paste!{
         tycell!{ $on {
             static $ty: lazy_write;
             set $lazy
             get $name();
         }}
-    }};  
-    (=$on:ty>$ty:ty: mut $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty $lazy:block)=>{paste!{
-        tycell!{ $on {
-            static $ty: lazy_write;
-            set $lazy
-            get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
-        }}
-    }};
-    (=$on:ty>$ty:ty: mut $name:ident $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty)=>{paste!{
-        tycell!{ $on {
-            static $ty: lazy_write;
-            set $lazy
-            get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
-        }}
-    }};
-    (=$on:ty>$ty:ty: mut $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* $lazy:block)=>{paste!{
-        tycell!{ $on {
-            static $ty: lazy_write;
-            set $lazy
-            get $name() -> $ty: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
-        }}
     }};
 
-    // quick once
+    // with Methods - Pre-Block
+    (=$on:ty>$ty:ty: mut $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty $lazy:block)=>{paste!{
+        tycell!{ $on {
+            static $ty: lazy_write;
+            set $lazy
+            get [<$name _ref>]();
+            get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }}; 
+
+    // with Methods - Post-Block
+    (=$on:ty>$ty:ty: mut $name:ident $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static $ty: lazy_write;
+            set $lazy
+            get [<$name _ref>]();
+            get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }}; 
+    
+    // with Methods & Self Return Type - Pre-Block
+    (=$on:ty>$ty:ty: mut $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ $lazy:block)=>{paste!{
+        tycell!{ $on {
+            static $ty: lazy_write;
+            set $lazy
+            get [<$name _ref>]();
+            get $name() -> $ty: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }}; 
+
+    // with Methods & Self Return Type - Post-Block
+    (=$on:ty>$ty:ty: mut $name:ident $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+)=>{paste!{
+        tycell!{ $on {
+            static $ty: lazy_write;
+            set $lazy
+            get [<$name _ref>]();
+            get $name() -> $ty: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
+        }}
+    }}; 
+
+/* ------------------------------- Simple Once ------------------------------ */
+
+    // Base
     (=$on:ty>$ty:ty: $name:ident)=>{paste!{
         tycell!{ $on {
             static $ty: once_read;
@@ -441,23 +482,30 @@ macro_rules! tycell {
             get $name();
         }}
     }};  
-    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty)=>{paste!{
+
+    // with Methods
+    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty)=>{paste!{
         tycell!{ $on {
             static $ty: once_read;
             set [<set_ $name>]();
+            get [<$name _ref>]();
             get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
         }}
     }};  
-    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*)=>{paste!{
+    
+    // with Methods & Self Return Type
+    (=$on:ty>$ty:ty: $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+)=>{paste!{
         tycell!{ $on {
             static $ty: once_read;
             set [<set_ $name>]();
+            get [<$name _ref>]();
             get $name() -> $ty: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
         }}
     }};
 
+/* --------------------------- Simple Mutable Once -------------------------- */
 
-    // quick once mut
+    // Base
     (=$on:ty>$ty:ty: mut $name:ident)=>{paste!{
         tycell!{ $on {
             static $ty: once_write;
@@ -465,6 +513,8 @@ macro_rules! tycell {
             get $name();
         }}
     }}; 
+
+    // with Methods
     (=$on:ty>$ty:ty: mut $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))* -> $gret:ty)=>{paste!{
         tycell!{ $on {
             static $ty: once_write;
@@ -472,6 +522,8 @@ macro_rules! tycell {
             get $name() -> $gret: static$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))*;
         }}
     }}; 
+
+    // with Methods & Self Return Type
     (=$on:ty>$ty:ty: mut $name:ident $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))*)=>{paste!{
         tycell!{ $on {
             static $ty: once_write;
@@ -480,8 +532,9 @@ macro_rules! tycell {
         }}
     }}; 
 
+/* ----------------------------- Simple Constant ---------------------------- */
 
-    // quick const
+    // Base
     (=$on:ty>$ty:ty: $name:ident = $val:expr)=>{paste!{
         tycell!{ $on {
             const $ty = $val;
@@ -489,9 +542,9 @@ macro_rules! tycell {
         }}
     }}; 
 
-/* ----------------------------- Simple HashMap ----------------------------- */
+/* ---------------------------- Simple Lazy TyMap --------------------------- */
 
-    // quick lazy
+    // Base
     (=$on:ty>$ty:ty: $name:ident <$key:ty> $lazy:block)=>{paste!{
         tycell!{ $on {
             static TyMap<$key,$ty>: lazy_read;
@@ -499,20 +552,75 @@ macro_rules! tycell {
             get [<$name _map>]();
             get $name() -> &'static $ty: static.get(id:&$key).unwrap();
         }}
+    }}; 
+    
+    // with Methods - Post-Block
+    (=$on:ty>$ty:ty: $name:ident <$key:ty> $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static TyMap<$key,$ty>: lazy_read;
+            set $lazy
+            get [<$name _map>]();
+            get [<$name _ref>]() -> &'static $ty: static.get(id:&$key).unwrap();
+            get $name() -> $gret: static.get(id:&$key).unwrap()$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+;
+        }}
     }};  
 
-    // quick lazy mut
+    // with Methods - Pre-Block
+    (=$on:ty>$ty:ty: $name:ident <$key:ty> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty $lazy:block)=>{paste!{
+        tycell!{=$on>$ty: $name <$key> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $gret}
+    }};  
+
+    // with Methods & Self Return Type - Pre-Block
+    (=$on:ty>$ty:ty: $name:ident <$key:ty> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ $lazy:block)=>{paste!{
+        tycell!{=$on>$ty: $name <$key> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }};  
+
+    // with Methods & Self Return Type - Post-Block
+    (=$on:ty>$ty:ty: $name:ident <$key:ty> $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+)=>{paste!{
+        tycell!{=$on>$ty: $name <$key> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }};  
+
+/* ------------------------ Simple Mutable Lazy TyMap ----------------------- */
+
+    // Base
     (=$on:ty>$ty:ty: mut $name:ident <$key:ty> $lazy:block)=>{paste!{
         tycell!{ $on {
             static TyMap<$key,$ty>: lazy_write;
             set $lazy
             get [<$name _map>]();
-            get $name() -> &'static $ty: static.get(id:&$key).unwrap();
-            get [<$name _mut>]() -> &'static mut $ty: static.get_mut(id:&$key).unwrap();
+            get $name() -> &'static mut $ty: static.get_mut(id:&$key).unwrap();
+        }}
+    }}; 
+    
+    // with Methods - Post-Block
+    (=$on:ty>$ty:ty: mut $name:ident <$key:ty> $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static TyMap<$key,$ty>: lazy_write;
+            set $lazy
+            get [<$name _map>]();
+            get [<$name _ref>]() -> &'static mut $ty: static.get_mut(id:&$key).unwrap();
+            get $name() -> $gret: static.get(id:&$key).unwrap()$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+;
         }}
     }};  
 
-    // quick once
+    // with Methods - Pre-Block
+    (=$on:ty>$ty:ty: mut $name:ident <$key:ty> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty $lazy:block)=>{paste!{
+        tycell!{=$on>$ty: $name <$key> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $gret}
+    }};  
+
+    // with Methods & Self Return Type - Pre-Block
+    (=$on:ty>$ty:ty: mut $name:ident <$key:ty> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ $lazy:block)=>{paste!{
+        tycell!{=$on>$ty: $name <$key> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }};  
+
+    // with Methods & Self Return Type - Post-Block
+    (=$on:ty>$ty:ty: mut $name:ident <$key:ty> $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+)=>{paste!{
+        tycell!{=$on>$ty: $name <$key> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }}; 
+
+/* ---------------------------- Simple Once TyMap --------------------------- */
+
+    // Base
     (=$on:ty>$ty:ty: $name:ident <$key:ty>)=>{paste!{
         tycell!{ $on {
             static TyMap<$key,$ty>: once_read;
@@ -522,20 +630,56 @@ macro_rules! tycell {
         }}
     }};  
 
-    // quick once mut
+    // with Methods
+    (=$on:ty>$ty:ty: $name:ident <$key:ty> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static TyMap<$key,$ty>: once_read;
+            set [<set_ $name>]();
+            get [<$name _map>]();
+            get [<$name _ref>]() -> &'static $ty: static.get(id:&$key).unwrap();
+            get $name() -> $gret: static.get(id:&$key).unwrap()$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+;
+        }}
+    }};  
+
+    // with Methods & Self Return Type
+    (=$on:ty>$ty:ty: $name:ident <$key:ty> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+)=>{paste!{
+        tycell!{=$on>$ty: $name <$key> $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }};
+
+
+/* ------------------------ Simple Mutable Once TyMap ----------------------- */
+
+    // Base
     (=$on:ty>$ty:ty: mut $name:ident <$key:ty>)=>{paste!{
         tycell!{ $on {
             static TyMap<$key,$ty>: once_write;
             set [<set_ $name>]();
             get [<$name _map>]();
-            get $name() -> &'static $ty: static.get(id:&$key).unwrap();
-            get [<$name _mut>]() -> &'static mut $ty: static.get_mut(id:&$key).unwrap();
+            get $name() -> &'static mut $ty: static.get_mut(id:&$key).unwrap();
         }}
-    }}; 
+    }};  
 
-/* ----------------------------- Simple Vec ----------------------------- */
+    // with Methods
+    (=$on:ty>$ty:ty: mut $name:ident <$key:ty> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static TyMap<$key,$ty>: once_write;
+            set [<set_ $name>]();
+            get [<$name _map>]();
+            get [<$name _ref>]() -> &'static mut $ty: static.get_mut(id:&$key).unwrap();
+            get $name() -> $gret: static.get(id:&$key).unwrap()$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+;
+        }}
+    }};  
 
-    // quick lazy
+    // with Methods & Self Return Type
+    (=$on:ty>$ty:ty: mut $name:ident <$key:ty> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+)=>{paste!{
+        tycell!{=$on>$ty: $name <$key> $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }};
+
+
+
+/* ----------------------------- Simple Lazy Vec ---------------------------- */
+
+    // Base
     (=$on:ty>$ty:ty: $name:ident <> $lazy:block)=>{paste!{
         tycell!{ $on {
             static Vec<$ty>: lazy_read;
@@ -543,20 +687,75 @@ macro_rules! tycell {
             get [<$name _vec>]();
             get $name() -> &'static $ty: static.get(id:usize).unwrap();
         }}
+    }}; 
+    
+    // with Methods - Post-Block
+    (=$on:ty>$ty:ty: $name:ident <> $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static Vec<$ty>: lazy_read;
+            set $lazy
+            get [<$name _vec>]();
+            get [<$name _ref>]() -> &'static $ty: static.get(id:usize).unwrap();
+            get $name() -> $gret: static.get(id:usize).unwrap()$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+;
+        }}
     }};  
 
-    // quick lazy mut
+    // with Methods - Pre-Block
+    (=$on:ty>$ty:ty: $name:ident <> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty $lazy:block)=>{paste!{
+        tycell!{=$on>$ty: $name <> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $gret}
+    }};  
+
+    // with Methods & Self Return Type - Pre-Block
+    (=$on:ty>$ty:ty: $name:ident <> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ $lazy:block)=>{paste!{
+        tycell!{=$on>$ty: $name <> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }};  
+
+    // with Methods & Self Return Type - Post-Block
+    (=$on:ty>$ty:ty: $name:ident <> $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+)=>{paste!{
+        tycell!{=$on>$ty: $name <> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }};  
+
+/* ------------------------- Simple Mutable Lazy Vec ------------------------ */
+
+    // Base
     (=$on:ty>$ty:ty: mut $name:ident <> $lazy:block)=>{paste!{
         tycell!{ $on {
             static Vec<$ty>: lazy_write;
             set $lazy
             get [<$name _vec>]();
-            get $name() -> &'static $ty: static.get(id:usize).unwrap();
-            get [<$name _mut>]() -> &'static mut $ty: static.get_mut(id:usize).unwrap();
+            get $name() -> &'static mut $ty: static.get_mut(id:usize).unwrap();
+        }}
+    }}; 
+    
+    // with Methods - Post-Block
+    (=$on:ty>$ty:ty: mut $name:ident <> $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static Vec<$ty>: lazy_write;
+            set $lazy
+            get [<$name _vec>]();
+            get [<$name _ref>]() -> &'static mut $ty: static.get_mut(id:usize).unwrap();
+            get $name() -> $gret: static.get(id:usize).unwrap()$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+;
         }}
     }};  
 
-    // quick once
+    // with Methods - Pre-Block
+    (=$on:ty>$ty:ty: mut $name:ident <> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty $lazy:block)=>{paste!{
+        tycell!{=$on>$ty: $name <> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $gret}
+    }};  
+
+    // with Methods & Self Return Type - Pre-Block
+    (=$on:ty>$ty:ty: mut $name:ident <> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ $lazy:block)=>{paste!{
+        tycell!{=$on>$ty: $name <> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }};  
+
+    // with Methods & Self Return Type - Post-Block
+    (=$on:ty>$ty:ty: mut $name:ident <> $lazy:block $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+)=>{paste!{
+        tycell!{=$on>$ty: $name <> $lazy $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }}; 
+
+/* ----------------------------- Simple Once Vec ---------------------------- */
+
+    // Base
     (=$on:ty>$ty:ty: $name:ident <>)=>{paste!{
         tycell!{ $on {
             static Vec<$ty>: once_read;
@@ -566,16 +765,50 @@ macro_rules! tycell {
         }}
     }};  
 
-    // quick once mut
+    // with Methods
+    (=$on:ty>$ty:ty: $name:ident <> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static Vec<$ty>: once_read;
+            set [<set_ $name>]();
+            get [<$name _vec>]();
+            get [<$name _ref>]() -> &'static $ty: static.get(id:usize).unwrap();
+            get $name() -> $gret: static.get(id:usize).unwrap()$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+;
+        }}
+    }};  
+
+    // with Methods & Self Return Type
+    (=$on:ty>$ty:ty: $name:ident <> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+)=>{paste!{
+        tycell!{=$on>$ty: $name <> $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }};
+
+
+/* ------------------------- Simple Mutable Once Vec ------------------------ */
+
+    // Base
     (=$on:ty>$ty:ty: mut $name:ident <>)=>{paste!{
         tycell!{ $on {
             static Vec<$ty>: once_write;
             set [<set_ $name>]();
             get [<$name _vec>]();
-            get $name() -> &'static $ty: static.get(id:usize).unwrap();
-            get [<$name _mut>]() -> &'static mut $ty: static.get_mut(id:usize).unwrap();
+            get $name() -> &'static mut $ty: static.get_mut(id:usize).unwrap();
         }}
-    }}; 
+    }};  
+
+    // with Methods
+    (=$on:ty>$ty:ty: mut $name:ident <> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+ -> $gret:ty)=>{paste!{
+        tycell!{ $on {
+            static Vec<$ty>: once_write;
+            set [<set_ $name>]();
+            get [<$name _map>]();
+            get [<$name _ref>]() -> &'static mut $ty: static.get_mut(id:usize).unwrap();
+            get $name() -> $gret: static.get(id:usize).unwrap()$(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+;
+        }}
+    }};  
+
+    // with Methods & Self Return Type
+    (=$on:ty>$ty:ty: mut $name:ident <> $(.$gmeth:ident( $($gvar:ident:$gvarty:ty),* $(=$gconst:expr),*))+)=>{paste!{
+        tycell!{=$on>$ty: $name <> $(.$gmeth( $($gvar:$gvarty),* $(=$gconst),*))+ -> $ty}
+    }};
 
 /* --------------------------- 🌍 Simple Merge 🌍 --------------------------- */
 
@@ -619,6 +852,7 @@ macro_rules! tycell {
     ($( {$($on:tt)*} $([$($name:tt)*])* )*)=>{paste!{
         $(tycell!{ $($on)*: $([$($name)*])*; })*
     }}; 
+    
     ($( {$($on:tt)*}: $([$($name:tt)*])*; )*)=>{paste!{
         $(tycell!{ $($on)*: $([$($name)*])*; })*
     }}; 
